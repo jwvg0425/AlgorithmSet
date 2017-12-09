@@ -3,9 +3,10 @@ class Dinic
 {
 public:
 	//a,b간에 capacity c인 엣지 추가
-	void addEdge(int a, int b, int c)
+	void addEdge(int a, int b, int c1, int c2 = 0)
 	{
-		capa[a][b] = c;
+		capa[a][b] = c1;
+		capa[b][a] = c2;
 		adj[a].push_back(b);
 		adj[b].push_back(a);
 	}
