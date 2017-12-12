@@ -1,17 +1,18 @@
 struct Edge
 {
-	int end, capa, flow;
+	int end;
+	i64 capa, flow;
 	Edge* dual;
 
 	Edge() : Edge(-1, 0) {}
-	Edge(int e, int c) : end(e), capa(c), flow(0), dual(nullptr) {}
+	Edge(int e, i64 c) : end(e), capa(c), flow(0), dual(nullptr) {}
 
-	int remain()
+	i64 remain()
 	{
 		return capa - flow;
 	}
 
-	void addFlow(int f)
+	void addFlow(i64 f)
 	{
 		flow += f;
 		dual->flow -= f;
@@ -22,6 +23,8 @@ template<int Size>
 class Dinic
 {
 public:
+
+	const i64 INFINITE = 1ll << 62;
 	~Dinic()
 	{
 		for (auto& a : adj)
@@ -33,8 +36,7 @@ public:
 		}
 	}
 
-	//a,b간에 capacity c인 엣지 추가
-	Edge* addEdge(int a, int b, int c)
+	Edge* addEdge(int a, int b, i64 c)
 	{
 		auto e1 = new Edge(b, c);
 		auto e2 = new Edge(a, 0);
@@ -47,9 +49,9 @@ public:
 		return e1;
 	}
 
-	int maxFlow(int source, int sink)
+	i64 maxFlow(int source, int sink)
 	{
-		int totalFlow = 0;
+		i64 totalFlow = 0;
 
 		while (bfs(source, sink))
 		{
@@ -57,7 +59,7 @@ public:
 
 			while (true)
 			{
-				int flow = dfs(source, sink, 987654321);
+				i64 flow = dfs(source, sink, INFINITE);
 
 				if (flow == 0)
 					break;
@@ -112,7 +114,7 @@ private:
 		return level[sink] != -1;
 	}
 
-	int dfs(int s, int e, int f)
+	i64 dfs(int s, int e, i64 f)
 	{
 		if (s == e)
 			return f;
@@ -124,7 +126,7 @@ private:
 			if (level[next->end] != level[s] + 1 || next->remain() <= 0)
 				continue;
 
-			int df = dfs(next->end, e, std::min(f, next->remain()));
+			i64 df = dfs(next->end, e, min(f, next->remain()));
 
 			if (df != 0)
 			{
