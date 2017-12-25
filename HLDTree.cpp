@@ -68,7 +68,7 @@ protected:
         if (u == top)
             return segment_trees[path].query(0, last);
 
-        return max(query_topdown(u, top),
+        return merge(query_topdown(u, top),
             segment_trees[path].query(0, last));
     }
 
@@ -136,7 +136,7 @@ protected:
         for (const auto& path : heavy_paths)
         {
             int m = path.size();
-            vector<int> values;
+            vector<T> values;
 
             for (int i = 1; i < m; i++)
                 values.push_back(this->value[path[i]]);
@@ -148,7 +148,7 @@ protected:
     int subtree_size[MAXN];
     vector<vector<int>> heavy_paths;
     vector<int> heavy_path_index;
-    vector<SegmentTree<int>> segment_trees;
+    vector<SegmentTree<T>> segment_trees;
 
     MergeFunc seg_merge;
     MergeFunc merge;
