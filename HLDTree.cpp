@@ -1,15 +1,7 @@
-template<typename T, int MAXN>
+template<typename T, typename SegT, int MAXN>
 class HLDTree : public Tree<T, MAXN>
 {
-    using MergeFunc = function<T(T, T)>;
 public:
-    HLDTree(const MergeFunc& seg_func)
-        : seg_merge(seg_func), merge(seg_func) {}
-
-    HLDTree(const MergeFunc& seg_func,
-        const MergeFunc& merge_func)
-        : seg_merge(seg_func), merge(merge_func) {}
-
     virtual void init(int root) override
     {
         Tree<T, MAXN>::init(root);
@@ -138,18 +130,18 @@ protected:
             int m = path.size();
             vector<T> values;
 
+            segment_trees.emplace_back();
+
             for (int i = 1; i < m; i++)
                 values.push_back(this->value[path[i]]);
 
-            segment_trees.emplace_back(values, seg_merge);
+            segment_trees.back().init(values);
         }
     }
+    virtual T merge(const T& left, const T& right) = 0;
 
     int subtree_size[MAXN];
     vector<vector<int>> heavy_paths;
     vector<int> heavy_path_index;
-    vector<SegmentTree<T>> segment_trees;
-
-    MergeFunc seg_merge;
-    MergeFunc merge;
+    vector<SegT> segment_trees;
 };
