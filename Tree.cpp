@@ -3,11 +3,11 @@ constexpr int clog2(int n)
     return ((n < 2) ? 1 : 1 + clog2(n / 2));
 }
 
-template<int MAXN>
+template<typename T, int MAXN>
 class Tree
 {
 public:
-    Tree()
+    Tree() : n(MAXN)
     {
         memset(parent, -1, sizeof(parent));
         memset(depth, -1, sizeof(depth));
@@ -15,17 +15,22 @@ public:
 
     void set_size(int n_)
     {
+        assert(!is_init);
+        assert(n_ < MAXN);
         n = n_;
     }
 
-    void add_edge(int a, int b)
+    void add_edge(int u, int v, T val = T())
     {
-        adj[a].push_back(b);
-        adj[b].push_back(a);
+        assert(!is_init);
+        adj[u].emplace_back(v, val);
+        adj[v].emplace_back(u, val);
     }
 
-    void init(int root)
+    virtual void init(int root)
     {
+        assert(!is_init);
+        is_init = true;
         depth[root] = 0;
         make_tree(root);
 
@@ -35,53 +40,63 @@ public:
                     parent[i][j + 1] = parent[parent[i][j]][j];
     }
 
-    int lca(int a, int b)
+    int lca(int u, int v)
     {
-        if (depth[a] < depth[b])
-            swap(a, b);
+        assert(is_init);
 
-        int diff = depth[a] - depth[b];
+        if (depth[u] < depth[v])
+            swap(u, v);
 
-        for (int j = 0; diff; j++)
+        int diff = depth[u] - depth[v];
+
+        for (int j = 0; diff > 0; j++)
         {
             if (diff % 2 == 1)
-                a = parent[a][j];
+                u = parent[u][j];
+
             diff /= 2;
         }
 
-        if (a != b)
+        if (u != v)
         {
             for (int j = K - 1; j >= 0; j--)
             {
-                if (parent[a][j] != -1 &&
-                    parent[a][j] != parent[b][j])
+                if (parent[u][j] != -1 &&
+                    parent[u][j] != parent[v][j])
                 {
-                    a = parent[a][j];
-                    b = parent[b][j];
+                    u = parent[u][j];
+                    v = parent[v][j];
                 }
             }
-            a = parent[a][0];
+            u = parent[u][0];
         }
 
-        return a;
+        return u;
     }
 
-private:
+protected:
+    const int K = clog2(MAXN) + 1;
+    bool is_init = false;
     int n;
     int root;
-    int K = clog2(MAXN) + 1;
     int parent[MAXN][clog2(MAXN) + 2];
     int depth[MAXN];
-    vector<int> child[MAXN];
-    vector<int> adj[MAXN];
+    T value[MAXN];
+    vector<int> children[MAXN];
+    vector<pair<int, T>> adj[MAXN];
 
     void make_tree(int root)
     {
-        for (int next : adj[root])
+        for (ii a : adj[root])
         {
+            int next = a.first;
+            int v = a.second;
+
             if (depth[next] == -1)
             {
                 parent[next][0] = root;
+                children[root].push_back(next);
+                value[next] = v;
                 depth[next] = depth[root] + 1;
                 make_tree(next);
             }

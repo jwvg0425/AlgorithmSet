@@ -12,6 +12,7 @@
 #include <math.h>
 #include <random>
 #include <functional>
+#include <assert.h>
 
 using namespace std;
 

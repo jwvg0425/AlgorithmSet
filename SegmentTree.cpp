@@ -2,10 +2,10 @@ template<typename T>
 class SegmentTree
 {
 public:
-    using comparer = function<T(const T&, const T&)>;
+    using MergeFunc = function<T(const T&, const T&)>;
 
-    SegmentTree(vector<T>& raw, comparer&& func)
-        : cmp(func), n(raw.size())
+    SegmentTree(vector<T>& raw, const MergeFunc& func)
+        : merge(func), n(raw.size())
     {
         int h = (int)ceil(log2(n));
         int tree_size = (1 << (h + 1));
@@ -26,7 +26,7 @@ public:
 
 private:
     vector<T> data;
-    comparer cmp;
+    MergeFunc merge;
     int n;
 
     T init(vector<T>& raw, int node, int start, int end)
@@ -35,7 +35,7 @@ private:
         if (start == end)
             return data[node] = raw[start];
         else
-            return data[node] = cmp(init(raw, node * 2, start, mid),
+            return data[node] = merge(init(raw, node * 2, start, mid),
                 init(raw, node * 2 + 1, mid + 1, end));
     }
 
@@ -51,7 +51,7 @@ private:
         else
         {
             int mid = (start + end) / 2;
-            data[node] = cmp(update_internal(node * 2, start, mid, index, newVal),
+            data[node] = merge(update_internal(node * 2, start, mid, index, newVal),
                 update_internal(node * 2 + 1, mid + 1, end, index, newVal));
         }
 
@@ -71,7 +71,7 @@ private:
         if (mid + 1 > right)
             return query_internal(node * 2, start, mid, left, right);
 
-        return cmp(query_internal(node * 2, start, mid, left, right),
+        return merge(query_internal(node * 2, start, mid, left, right),
             query_internal(node * 2 + 1, mid + 1, end, left, right));
     }
 };
