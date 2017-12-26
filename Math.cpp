@@ -38,3 +38,30 @@ private:
     vector<int> primes;
     int sieve[N + 1];
 };
+
+class Mapping
+{
+public:
+    void init(const vector<int>& raw)
+    {
+        arr = raw;
+        sort(arr.begin(), arr.end());
+
+        for (int i = 0; i < arr.size(); i++)
+            idx[arr[i]] = i;
+    }
+
+    int get_idx(int k)
+    {
+        return idx[k];
+    }
+
+    int get_value(int idx)
+    {
+        return arr[idx];
+    }
+
+private:
+    vector<int> arr;
+    map<int, int> idx;
+};
