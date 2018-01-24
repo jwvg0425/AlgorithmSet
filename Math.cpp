@@ -28,7 +28,7 @@ private:
 
             primes.push_back(i);
 
-            for (int j = i; j <= N; j++)
+            for (int j = i; j <= N; j+=i)
             {
                 sieve[j] = i;
             }
@@ -42,13 +42,14 @@ private:
 class Mapping
 {
 public:
-    void init(const vector<int>& raw)
+    void init(const vector<int>& raw, int base = 0)
     {
         arr = raw;
         sort(arr.begin(), arr.end());
+        arr.erase(unique(arr.begin(), arr.end()), arr.end());
 
         for (int i = 0; i < arr.size(); i++)
-            idx[arr[i]] = i;
+            idx[arr[i]] = base + i;
     }
 
     int get_idx(int k)
