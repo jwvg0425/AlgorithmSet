@@ -13,6 +13,7 @@
 #include <random>
 #include <functional>
 #include <assert.h>
+#include <math.h>
 
 using namespace std;
 
