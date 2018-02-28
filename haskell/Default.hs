@@ -43,5 +43,5 @@ fibo 0 = 0
 fibo 1 = 1
 fibo n = mfibo (n-1) + mfibo (n-2)
 
-mfibo = memo f
+mfibo = memo fibo
 -}
