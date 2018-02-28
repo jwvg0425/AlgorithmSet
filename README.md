@@ -1,7 +1,9 @@
 # AlgorithmSet
+
 대회용 Algorithm / DS 템플릿
 
-사용법 및 예제는 [doc](/doc) 참조.
+- [C++](cpp)
+- [haskell](haskell)
 
 아래 자료들을 참고해서 작성되었습니다.
 
