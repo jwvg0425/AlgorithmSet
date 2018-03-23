@@ -1,3 +1,4 @@
+import Data.Char
 import qualified Data.Sequence as S
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BS8

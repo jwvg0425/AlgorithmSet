@@ -7,9 +7,18 @@ import Data.Array (Array, array, (!))
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BS8
  
+construct :: BS.ByteString -> [Int]
+construct str
+    | BS.null str = []
+    | isSpace (BS8.head str) = construct (BS8.tail str)
+    | otherwise = let Just (i, other) = BS8.readInt str in i : construct other
+
 getInts :: IO [Int]
-getInts = (map parseInt . BS8.words) <$> BS.getLine 
-    where parseInt = fst . fromJust . BS8.readInt
+getInts = construct <$> BS.getLine
+
+fastPrint :: [Int] -> Builder -> IO ()
+fastPrint arr mid = hPutBuilder stdout  $ build arr
+    where build = foldr (\n b -> intDec n <> mid <> b)
 
 data Tree a = Tree (Tree a) a (Tree a)
 
