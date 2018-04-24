@@ -3,8 +3,12 @@ import Control.Monad
 import Data.Char
 import Data.List
 import Data.Maybe
+import Data.Monoid
 import Data.Function (fix)
 import Data.Array (Array, array, (!))
+import System.IO
+import Data.ByteString.Lazy.Builder
+import Data.ByteString.Lazy.Builder.ASCII
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BS8
  
@@ -17,9 +21,9 @@ construct str
 getInts :: IO [Int]
 getInts = construct <$> BS.getLine
 
-fastPrint :: [Int] -> Builder -> IO ()
-fastPrint arr mid = hPutBuilder stdout  $ build arr
-    where build = foldr (\n b -> intDec n <> mid <> b)
+fastPrint :: Char -> [Int] -> IO ()
+fastPrint mid arr = hPutBuilder stdout  $ build arr
+    where build = foldr (\n b -> intDec n <> charUtf8 mid <> b) mempty
 
 data Tree a = Tree (Tree a) a (Tree a)
 
