@@ -42,8 +42,9 @@ private:
 class Mapping
 {
 public:
-    void init(const vector<int>& raw, int base = 0)
+    void init(const vector<i64>& raw, int base = 0)
     {
+        start = base;
         arr = raw;
         sort(arr.begin(), arr.end());
         arr.erase(unique(arr.begin(), arr.end()), arr.end());
@@ -52,17 +53,18 @@ public:
             idx[arr[i]] = base + i;
     }
 
-    int get_idx(int k)
+    int get_idx(i64 k)
     {
         return idx[k];
     }
 
-    int get_value(int idx)
+    i64 get_value(int idx)
     {
-        return arr[idx];
+        return arr[idx - start];
     }
 
 private:
-    vector<int> arr;
-    map<int, int> idx;
+    int start;
+    vector<i64> arr;
+    map<i64, int> idx;
 };
