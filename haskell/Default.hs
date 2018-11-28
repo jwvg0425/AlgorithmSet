@@ -1,4 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
+import System.IO
+import Control.Applicative
 import Control.Monad
 import Data.Char
 import Data.List
@@ -6,57 +8,25 @@ import Data.Maybe
 import Data.Monoid
 import Data.Function (fix)
 import Data.Array (Array, array, (!))
-import System.IO
 import Data.ByteString.Lazy.Builder
 import Data.ByteString.Lazy.Builder.ASCII
+import qualified Data.Map as Map
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BS8
- 
-construct :: BS.ByteString -> [Int]
-construct str
+
+construct :: (BS.ByteString -> Maybe (a, BS.ByteString)) -> BS.ByteString -> [a]
+construct reader str
     | BS.null str = []
-    | isSpace (BS8.head str) = construct (BS8.tail str)
-    | otherwise = let Just (i, other) = BS8.readInt str in i : construct other
+    | isSpace (BS8.head str) = construct reader (BS8.tail str)
+    | otherwise = let Just (i, other) = reader str in i : construct reader other
 
 getInts :: IO [Int]
-getInts = construct <$> BS.getLine
+getInts = construct BS8.readInt <$> BS.getLine
 
-fastPrint :: Char -> [Int] -> IO ()
-fastPrint mid arr = hPutBuilder stdout  $ build arr
-    where build = foldr (\n b -> intDec n <> charUtf8 mid <> b) mempty
+getIntegers :: IO [Integer]
+getIntegers = construct BS8.readInteger <$> BS.getLine
 
-data Tree a = Tree (Tree a) a (Tree a)
+printInts :: [Int] -> IO ()
+printInts = putStrLn . intercalate " " . map show
 
-instance Functor Tree where
-    fmap f (Tree l m r) = Tree (fmap f l) (f m) (fmap f r)
-
-index :: Tree a -> Int -> a
-index (Tree _ m _) 0 = m
-index (Tree l _ r) n = case (n - 1) `divMod` 2 of
-    (q,0) -> index l q
-    (q,1) -> index r q
-
-nats :: Tree Int
-nats = go 0 1
-    where go !n !s = Tree (go l s') n (go r s')
-            where l = n + s
-                  r = l + s
-                  s' = s * 2
-
-memo :: (Int -> a) -> (Int -> a)
-memo f = index cached
-    where cached = fmap f nats
-
-memo2 :: (Int -> Int -> a) -> (Int -> Int -> a)
-memo2 f = memo (\x -> memo (f x))
-
-memo3 :: (Int -> Int -> Int -> a) -> (Int -> Int -> Int -> a)
-memo3 f = memo (\x -> memo2 (f x))
-
-{- dp example
-fibo 0 = 0
-fibo 1 = 1
-fibo n = mfibo (n-1) + mfibo (n-2)
-
-mfibo = memo fibo
--}
+(!) = (Map.!)
