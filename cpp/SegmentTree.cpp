@@ -17,7 +17,7 @@ public:
         _init(raw, 1, 0, n - 1);
     }
 
-    T add(int idx, const T& newVal) { raw[idx] += newVal; return update(idx, raw[idx]); }
+    T modify(int idx, function<T(T)> modifier) { return update(idx, modifier(raw[idx])); }
     T update(int idx, const T& newVal) { raw[idx] = newVal; return _update(1, 0, n - 1, idx, newVal); }
     T query(int left, int right) { return _query(1, 0, n - 1, left, right); }
 
