@@ -14,6 +14,9 @@
 #include <functional>
 #include <assert.h>
 #include <math.h>
+#define all(x) (x).begin(), (x).end()
+#define xx first
+#define yy second
 
 using namespace std;
 
