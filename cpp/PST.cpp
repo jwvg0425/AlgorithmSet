@@ -75,7 +75,7 @@ private:
 		return nidx;
 	}
 
-	int _query(int idx, int start, int end)
+	T _query(int idx, int start, int end)
 	{
 		if (start <= node[idx].start && node[idx].end <= end)
 			return node[idx].value;
