@@ -13,3 +13,9 @@ fn read_string() -> Vec<char> {
     io::stdin().read_line(&mut input).unwrap();
     input.chars().collect()
 }
+
+fn make_string<T>(arr: &Vec<T>, sep: &str) -> String
+    where T: std::string::ToString {
+    let str_arr: Vec<String> = arr.iter().map(|x|x.to_string()).collect();
+    str_arr.join(sep)
+}
