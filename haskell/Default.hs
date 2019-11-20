@@ -30,3 +30,9 @@ printInts :: [Int] -> IO ()
 printInts = putStrLn . intercalate " " . map show
 
 (!) = (Map.!)
+
+main = input >>= output . solve
+
+input =
+solve =
+output =
