@@ -34,5 +34,5 @@ printInts = putStrLn . intercalate " " . map show
 main = input >>= output . solve
 
 input =
-solve =
 output =
+solve =
