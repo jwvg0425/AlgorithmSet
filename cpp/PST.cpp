@@ -9,14 +9,14 @@ class PST
 
 		Node() = default;
 		Node(int start_, int end_)
-			:start(start_), end(end_), value(T()) {}
+			:start(start_), end(end_), value(T()), lidx(0), ridx(0) {}
 	};
 
 public:
 	PST(int n_, Merge m) : n(n_), merge(m)
 	{
-		root.push_back(init(0, n));
-		raw.resize(n);
+		node.reserve(50 * n);
+		root.reserve(50 * n);
 	}
 
 	void modify(int idx, function<T(T)> modifier)
@@ -36,8 +36,13 @@ public:
 		return _query(root[k], start, end);
 	}
 
-private:
+	void init()
+	{
+		root.push_back(init(0, n));
+		raw.resize(n);
+	}
 
+private:
 	int init(int start, int end)
 	{
 		int idx = node.size();
@@ -50,11 +55,10 @@ private:
 			node[idx].lidx = init(start, mid);
 			node[idx].ridx = init(mid + 1, end);
 		}
-
 		return idx;
 	}
 
-	int _update(int prev, int idx, int value, int start, int end)
+	int _update(int prev, int idx, const T& value, int start, int end)
 	{
 		if (idx < start || idx > end)
 			return prev;
