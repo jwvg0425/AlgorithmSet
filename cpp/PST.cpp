@@ -15,8 +15,6 @@ class PST
 public:
 	PST(int n_, Merge m) : n(n_), merge(m)
 	{
-		node.reserve(50 * n);
-		root.reserve(50 * n);
 	}
 
 	void modify(int idx, function<T(T)> modifier)
