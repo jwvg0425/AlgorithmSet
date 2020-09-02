@@ -3,7 +3,7 @@ constexpr int clog2(int n) { return ((n < 2) ? 1 : 1 + clog2(n / 2)); }
 class SegTreeLazy
 {
 public:
-	i64 init(vector<i64> arr)
+	void init(vector<i64> arr)
 	{
 		n = (int)arr.size();
 		int sz = (1 << (clog2(n) + 1));
