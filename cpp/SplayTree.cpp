@@ -3,7 +3,7 @@ template<typename T, typename cmp = less<T>>
 class SplayTree
 {
 public:
-    void insert(T key)
+    void insert(const T& key)
     {
         sz++;
 
@@ -16,7 +16,7 @@ public:
         root = root->insert(key);
     }
 
-    bool find(T key)
+    bool find(const T& key)
     {
         if (root == nullptr)
             return false;
@@ -25,7 +25,7 @@ public:
         return root->key == key;
     }
 
-    bool erase(T key)
+    bool erase(const T& key)
     {
         if (root == nullptr)
             return false;
@@ -71,7 +71,7 @@ public:
 private:
     struct Node
     {
-        Node(T k) : key(k)
+        Node(const T& k) : key(k)
         {
         }
 
@@ -145,7 +145,7 @@ private:
             }
         }
 
-        Node* insert(T k)
+        Node* insert(const T& k)
         {
             if (k == key)
             {
@@ -167,7 +167,7 @@ private:
             return r->insert(k);
         }
 
-        Node* find(T k)
+        Node* find(const T& k)
         {
             if (k == key)
             {
