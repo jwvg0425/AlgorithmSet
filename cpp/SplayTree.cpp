@@ -1,131 +1,71 @@
-template<typename T>
+// key based normal splay tree
+template<typename T, typename cmp = less<T>>
 class SplayTree
 {
 public:
     void insert(T key)
     {
-        Node* now = root;
+        sz++;
 
         if (root == nullptr)
         {
-            root = create(key);
+            root = new Node(key);
             return;
         }
 
-        while (true)
-        {
-            if (key == now->key)
-                return;
-
-            if (key < now->key)
-            {
-                if (now->left == nullptr)
-                {
-                    auto added = create(key);
-                    now->set_left(added);
-                    splay(added);
-                    break;
-                }
-
-                now = now->left;
-            }
-            else
-            {
-                if (now->right == nullptr)
-                {
-                    auto added = create(key);
-                    now->set_right(added);
-                    splay(added);
-                    break;
-                }
-
-                now = now->right;
-            }
-        }
+        root = root->insert(key);
     }
 
     bool find(T key)
     {
-        Node* now = root;
-
         if (root == nullptr)
             return false;
 
-        while (true)
-        {
-            if (key == now->key)
-                break;
-
-            if (key < now->key)
-            {
-                if (now->left == nullptr)
-                    break;
-
-                now = now->left;
-            }
-            else
-            {
-                if (now->right == nullptr)
-                    break;
-
-                now = now->right;
-            }
-        }
-
-        splay(now);
-        return key == now->key;
+        root = root->find(key);
+        return root->key == key;
     }
 
-    void erase(T key)
+    bool erase(T key)
     {
-        if (!find(key))
-            return;
+        if (root == nullptr)
+            return false;
 
-        Node* pre = root;
+        root = root->find(key);
+        if (root->key != key)
+            return false;
 
-        if (pre->left != nullptr)
-        {
-            if (pre->right != nullptr)
-            {
-                root = pre->left;
-                root->parent = nullptr;
-                Node* rp = root;
-                while (rp->right != nullptr)
-                    rp = rp->right;
+        sz--;
+        root = root->erase();
+        return true;
+    }
 
-                rp->set_right(pre->right);
-                splay(rp);
-                delete pre;
-                return;
-            }
+    int size() const
+    {
+        return sz;
+    }
 
-            root = pre->left;
-            root->parent = nullptr;
-            delete pre;
-            return;
-        }
-
-        if (pre->right != nullptr)
-        {
-            root = pre->right;
-            root->parent = nullptr;
-            delete pre;
-            return;
-        }
-
-        delete pre;
-        root = nullptr;
+    T find_nth(int n)
+    {
+        root = root->find_nth(n);
+        return root->key;
     }
 
     void clear()
     {
         while (root != nullptr)
-            erase(root->key);
+            root = root->erase();
     }
 
     ~SplayTree()
     {
         clear();
+    }
+
+    void interval(int l, int r)
+    {
+        root = root->find_nth(l - 1);
+        root->r->p = nullptr;
+        root->set_right(root->r->find_nth(r - l + 1));
     }
 
 private:
@@ -135,80 +75,172 @@ private:
         {
         }
 
-        Node* left = nullptr;
-        Node* right = nullptr;
-        Node* parent = nullptr;
+        Node* l = nullptr;
+        Node* r = nullptr;
+        Node* p = nullptr;
         T key;
+        int cnt = 1;
 
         void set_left(Node* n)
         {
-            left = n;
-            if (n != nullptr)
-                n->parent = this;
+            l = n;
+            if (n != nullptr) n->p = this;
         }
 
         void set_right(Node* n)
         {
-            right = n;
-            if (n != nullptr)
-                n->parent = this;
+            r = n;
+            if (n != nullptr) n->p = this;
+        }
+
+        void update()
+        {
+            cnt = 1;
+            if (l != nullptr) cnt += l->cnt;
+            if (r != nullptr) cnt += r->cnt;
+        }
+
+        void rotate()
+        {
+            Node* pp = p;
+            Node* g = p->p;
+            p = g;
+            if (g != nullptr)
+            {
+                if (g->l == pp)
+                    g->set_left(this);
+                else
+                    g->set_right(this);
+            }
+
+            if (this == pp->l)
+            {
+                pp->set_left(r);
+                set_right(pp);
+            }
+            else
+            {
+                pp->set_right(l);
+                set_left(pp);
+            }
+
+            pp->update();
+            update();
+        }
+
+        void splay()
+        {
+            while (p != nullptr)
+            {
+                Node* g = p->p;
+                if (g != nullptr)
+                {
+                    if ((this == p->l) == (p == g->l))
+                        p->rotate();
+                    else
+                        rotate();
+                }
+
+                rotate();
+            }
+        }
+
+        Node* insert(T k)
+        {
+            if (k == key)
+            {
+                splay();
+                return this;
+            }
+
+            if (cmp()(k, key))
+            {
+                if (l == nullptr)
+                    set_left(new Node(k));
+
+                return l->insert(k);
+            }
+
+            if (r == nullptr)
+                set_right(new Node(k));
+
+            return r->insert(k);
+        }
+
+        Node* find(T k)
+        {
+            if (k == key)
+            {
+                splay();
+                return this;
+            }
+
+            if (cmp()(k, key))
+            {
+                if (l == nullptr)
+                {
+                    splay();
+                    return this;
+                }
+
+                return l->find(k);
+            }
+
+            if (r == nullptr)
+            {
+                splay();
+                return this;
+            }
+
+            return r->find(k);
+        }
+
+        // 0-based
+        Node* find_nth(int n)
+        {
+            if (l != nullptr)
+            {
+                if (l->cnt > n)
+                    return l->find_nth(n);
+
+                n -= l->cnt;
+            }
+
+            if (n == 0)
+            {
+                splay();
+                return this;
+            }
+
+            if (r == nullptr)
+                return nullptr;
+
+            return r->find_nth(n - 1);
+        }
+
+        Node* erase()
+        {
+            if (l != nullptr && r != nullptr)
+            {
+                l->p = nullptr;
+                Node* rp = l;
+                while (rp->r != nullptr) rp = rp->r;
+                rp->set_right(r);
+                rp->splay();
+                delete this;
+                return rp;
+            }
+
+            auto nxt = (l == nullptr) ? r : l;
+            delete this;
+
+            if (nxt != nullptr)
+                nxt->p = nullptr;
+
+            return nxt;
         }
     };
 
     Node* root = nullptr;
-
-    Node* create(T k)
-    {
-        auto node = new Node(k);
-        return node;
-    }
-
-    void rotate(Node* node)
-    {
-        Node* p = node->parent;
-        Node* g = p->parent;
-        if (g != nullptr)
-        {
-            if (g->left == p)
-                g->set_left(node);
-            else
-                g->set_right(node);
-        }
-        else
-        {
-            node->parent = nullptr;
-            root = node;
-        }
-
-        if (node == p->left)
-        {
-            Node* r = node->right;
-            p->set_left(r);
-            node->set_right(p);
-        }
-        else
-        {
-            Node* l = node->left;
-            p->set_right(l);
-            node->set_left(p);
-        }
-    }
-
-    void splay(Node* node)
-    {
-        while (node->parent != nullptr)
-        {
-            Node* p = node->parent;
-            Node* g = p->parent;
-            if (g != nullptr)
-            {
-                if ((node == p->left) == (p == g->left))
-                    rotate(p);
-                else
-                    rotate(node);
-            }
-
-            rotate(node);
-        }
-    }
+    int sz = 0;
 };
