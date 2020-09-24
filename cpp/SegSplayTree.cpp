@@ -17,6 +17,12 @@ public:
         }
     }
 
+    void set(int i, const T& val)
+    {
+        root = root->find_nth(i);
+        root->set(val);
+    }
+
     void add(int i, const T& val)
     {
         root = root->find_nth(i);
@@ -27,11 +33,6 @@ public:
     {
         interval(l, r);
         return root->r->l->sum;
-    }
-
-    ~SegSplayTree()
-    {
-        root->clear();
     }
 
     void interval(int l, int r)
@@ -64,6 +65,12 @@ private:
         {
             r = n;
             if (n != nullptr) n->p = this;
+        }
+
+        void set(const T& v)
+        {
+            val = v;
+            update();
         }
 
         void update(const T& v)
@@ -155,14 +162,6 @@ private:
                 return nullptr;
 
             return r->find_nth(n - 1);
-        }
-
-        void clear()
-        {
-            if (l != nullptr) l->clear();
-            if (r != nullptr) r->clear();
-
-            delete this;
         }
     };
 
