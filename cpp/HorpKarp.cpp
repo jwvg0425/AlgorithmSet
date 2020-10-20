@@ -1,4 +1,3 @@
-
 template<int Size>
 class HorpKarp
 {
@@ -26,6 +25,7 @@ public:
         while (true)
         {
             bfs();
+            memset(work, 0, sizeof(work));
 
             int flow = 0;
             for (int i = 0; i <= n; i++)
@@ -49,11 +49,12 @@ private:
     int dist[Size];
     bool used[Size];
     vector<int> adj[Size];
+    int work[Size] = { 0, };
 
     void bfs()
     {
         queue<int> q;
-        
+
         for (int i = 0; i <= n; i++)
         {
             if (!used[i])
@@ -62,13 +63,13 @@ private:
                 q.push(i);
                 continue;
             }
-            
+
             dist[i] = INF;
         }
 
         while (!q.empty())
         {
-            int s= q.front();
+            int s = q.front();
             q.pop();
             for (int e : adj[s])
             {
@@ -83,9 +84,10 @@ private:
 
     bool dfs(int s)
     {
-        for (int e : adj[s])
+        for (int& i = work[s]; i < adj[s].size(); i++)
         {
-            if (b[e] == -1 || dist[b[e]] == dist[s] + 1 && dfs(b[e]))
+            auto e = adj[s][i];
+            if (b[e] == -1 || (dist[b[e]] == dist[s] + 1 && dfs(b[e])))
             {
                 used[s] = true;
                 a[s] = e;
