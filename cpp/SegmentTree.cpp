@@ -1,11 +1,11 @@
 constexpr int clog2(int n) { return ((n < 2) ? 1 : 1 + clog2(n / 2)); }
 
-template<typename T, typename Merge>
+template<typename T>
 class SegmentTree
 {
 public:
-    SegmentTree(Merge m)
-        :merge(m) {}
+    template<typename M>
+    SegmentTree(const M& m): merge(m) {}
 
     void init(vector<T>& raw_)
     {
@@ -25,6 +25,7 @@ private:
     vector<T> raw;
     vector<T> data;
     int n;
+    using Merge = function<T(const T&, const T&)>;
     Merge merge;
 
     T _init(vector<T>& raw, int node, int start, int end)
@@ -71,9 +72,3 @@ private:
             _query(node * 2 + 1, mid + 1, end, left, right));
     }
 };
-
-template<typename T, typename Merge>
-SegmentTree<T, Merge> segTree(Merge merge)
-{
-    return SegmentTree<T, Merge>(merge);
-}
