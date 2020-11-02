@@ -1,147 +1,184 @@
-template<typename T, typename SegT, int MAXN>
-class HLDTree : public Tree<T, MAXN>
+#include <stdio.h>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <bitset>
+#include <map>
+#include <set>
+#include <tuple>
+#include <string.h>
+#include <math.h>
+#include <random>
+#include <functional>
+#include <assert.h>
+#include <math.h>
+#define all(x) (x).begin(), (x).end()
+#define xx first
+#define yy second
+
+using namespace std;
+
+template<typename T, typename Pr = less<T>>
+using pq = priority_queue<T, vector<T>, Pr>;
+using i64 = long long int;
+using ii = pair<int, int>;
+using ii64 = pair<i64, i64>;
+
+constexpr int clog2(int n) { return ((n < 2) ? 1 : 1 + clog2(n / 2)); }
+
+template<typename T>
+class SegmentTree
 {
 public:
-    virtual void init(int root) override
+    template<typename M>
+    SegmentTree(const M& m) : merge(m) {}
+
+    void init(vector<T>& raw_)
     {
-        Tree<T, MAXN>::init(root);
-        calc_subtree(root);
-        heavy_light_decomposition(root);
-        init_trees();
+        raw = raw_;
+        n = (int)raw.size();
+        int sz = (1 << (clog2(n) + 1));
+        data.resize(sz);
+
+        _init(raw, 1, 0, n - 1);
     }
 
-    void update(int u, int v, const T& val)
+    T modify(int idx, function<T(T)> modifier) { return update(idx, modifier(raw[idx])); }
+    T update(int idx, const T& newVal) { raw[idx] = newVal; return _update(1, 0, n - 1, idx, newVal); }
+    T query(int left, int right) { return _query(1, 0, n - 1, left, right); }
+
+private:
+    vector<T> raw;
+    vector<T> data;
+    int n;
+    using Merge = function<T(const T&, const T&)>;
+    Merge merge;
+
+    T _init(vector<T>& raw, int node, int start, int end)
     {
-        assert(this->is_init);
-
-        if (this->parent[u][0] == v)
-            swap(u, v);
-
-        assert(this->parent[v][0] == u);
-
-        int path = heavy_path_index[v];
-        int index = find_edge(path, v);
-
-        segment_trees[path].update(index, val);
+        int mid = (start + end) / 2;
+        if (start == end)
+            return data[node] = raw[start];
+        else
+            return data[node] = merge(_init(raw, node * 2, start, mid),
+                _init(raw, node * 2 + 1, mid + 1, end));
     }
 
-    T query(int u, int v)
+    T _update(int node, int start, int end, int index, const T& newVal)
     {
-        assert(u != v);
-        int common = this->lca(u, v);
+        if (index < start || index > end)
+            return data[node];
 
-        if (common == u)
-            return query_topdown(common, v);
-
-        if (common == v)
-            return query_topdown(common, u);
-
-        return merge(query_topdown(common, u), query_topdown(common, v));
-    }
-
-protected:
-    T query_topdown(int u, int v)
-    {
-        if (heavy_path_index[u] == heavy_path_index[v])
+        if (start == end)
+            data[node] = newVal;
+        else
         {
-            int path = heavy_path_index[u];
-            int first = find_edge(path, u) + 1;
-            int last = find_edge(path, v);
-            return segment_trees[path].query(first, last);
+            int mid = (start + end) / 2;
+            data[node] = merge(_update(node * 2, start, mid, index, newVal),
+                _update(node * 2 + 1, mid + 1, end, index, newVal));
         }
 
-        int path = heavy_path_index[v];
-        int top = heavy_paths[path][0];
-
-        assert(top != v);
-
-        int last = find_edge(path, v);
-
-        if (u == top)
-            return segment_trees[path].query(0, last);
-
-        return merge(query_topdown(u, top),
-            segment_trees[path].query(0, last));
+        return data[node];
     }
 
-    int find_edge(int path_index, int v)
+    T _query(int node, int start, int end, int left, int right)
     {
-        int top_of_path = heavy_paths[path_index][0];
-        return this->depth[this->parent[v][0]] - this->depth[top_of_path];
+        if (left <= start && end <= right)
+            return data[node];
+
+        int mid = (start + end) / 2;
+
+        if (mid < left)
+            return _query(node * 2 + 1, mid + 1, end, left, right);
+
+        if (mid + 1 > right)
+            return _query(node * 2, start, mid, left, right);
+
+        return merge(_query(node * 2, start, mid, left, right),
+            _query(node * 2 + 1, mid + 1, end, left, right));
+    }
+};
+
+
+template<typename T, int SZ>
+class HLD
+{
+public:
+    template<typename M>
+    HLD(const M& m) : merge(m), tree(m)
+    {
     }
 
-    void calc_subtree(int root)
+    void add_edge(int x, int y)
     {
-        subtree_size[root] = 1;
+        edge[x].push_back(y);
+        edge[y].push_back(x);
+    }
 
-        for (int child : this->children[root])
+    void init(int root, const vector<T>& raw)
+    {
+        t = 1;
+        dfs_sz(root);
+        dfs_hld(root);
+        tree.init(raw);
+    }
+
+    void update(int idx, const T& val)
+    {
+        tree.update(idx, val);
+    }
+
+    T query_path(int u, int v)
+    {
+
+    }
+
+    T query_subtree(int u)
+    {
+        return tree.query(in[u], out[u]);
+    }
+
+private:
+    void dfs_sz(int root)
+    {
+        sz[root] = 1;
+        for (auto& e : edge[root])
         {
-            calc_subtree(child);
-            subtree_size[root] += subtree_size[child];
+            edge[e].erase(find(all(edge[e]), root));
+            dfs_sz(e);
+            sz[root] += sz[e];
+
+            if (sz[e] > sz[edge[root][0]])
+                swap(e, sz[root][0]);
         }
     }
 
-    void heavy_light_decomposition(int root)
+    void dfs_hld(int root)
     {
-        assert(this->is_init);
-        heavy_paths.clear();
-        heavy_path_index.resize(this->n + 1, -1);
-
-        queue<int> q;
-        q.push(root);
-
-        while (!q.empty())
+        in[root] = t++;
+        for (auto& e : edge[root])
         {
-            int here = q.front();
-            q.pop();
-
-            for (auto& child : this->children[here])
-                q.push(child);
-
-            if (here == root)
-                continue;
-
-            int p = this->parent[here][0];
-
-            if (subtree_size[here] * 2 >= subtree_size[p] &&
-                p != root)
-            {
-                int parent_path_index = heavy_path_index[p];
-                heavy_paths[parent_path_index].push_back(here);
-                heavy_path_index[here] = parent_path_index;
-            }
+            if (e == edge[root][0])
+                top[e] = top[root];
             else
-            {
-                heavy_path_index[here] = heavy_paths.size();
-                heavy_paths.push_back(vector<int>(2));
-                heavy_paths.back()[0] = p;
-                heavy_paths.back()[1] = here;
-            }
+                top[e] = e;
+
+            dfs_hld(e);
         }
+
+        out[root] = t;
     }
 
-    void init_trees()
-    {
-        segment_trees.clear();
-        segment_trees.reserve(heavy_paths.size());
+    SegmentTree<T> tree;
+    using Merge = function<T(const T&, const T&)>;
+    Merge merge;
 
-        for (const auto& path : heavy_paths)
-        {
-            int m = path.size();
-            vector<T> values;
-
-            segment_trees.emplace_back();
-
-            for (int i = 1; i < m; i++)
-                values.push_back(this->value[path[i]]);
-
-            segment_trees.back().init(values);
-        }
-    }
-    virtual T merge(const T& left, const T& right) = 0;
-
-    int subtree_size[MAXN];
-    vector<vector<int>> heavy_paths;
-    vector<int> heavy_path_index;
-    vector<SegT> segment_trees;
+    vector<int> edge[SZ];
+    int t = 1;
+    int sz[SZ];
+    int in[SZ];
+    int out[SZ];
+    int top[SZ];
 };
