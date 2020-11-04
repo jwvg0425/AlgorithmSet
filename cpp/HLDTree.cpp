@@ -1,4 +1,5 @@
 
+// dependency : SegmentTree.cpp
 template<typename T, int SZ>
 class HLD
 {
@@ -6,6 +7,7 @@ public:
     template<typename M>
     HLD(const M& m) : merge(m), tree(m)
     {
+        memset(in, -1, sizeof(in));
     }
 
     void add_edge(int x, int y)
@@ -17,19 +19,41 @@ public:
     void init(int root, const vector<T>& raw)
     {
         t = 1;
+        in[0] = 0;
+        depth[root] = 1;
         dfs_sz(root);
         dfs_hld(root);
-        tree.init(raw);
+
+        vector<T> changed(raw.size());
+
+        for (int i = root; i < raw.size(); i++)
+        {
+            if (in[i] == -1)
+                continue;
+
+            changed[in[i]] = raw[i];
+        }
+
+        tree.init(changed);
     }
 
     void update(int idx, const T& val)
     {
-        tree.update(idx, val);
+        tree.update(in[idx], val);
     }
 
     T query_path(int u, int v)
     {
+        if (depth[u] > depth[v])
+            swap(u, v);
 
+        if (top[u] == top[v])
+            return tree.query(in[u], in[v]);
+
+        if (depth[top[u]] > depth[top[v]])
+            swap(u, v);
+
+        return merge(tree.query(in[top[v]], in[v]), query_path(par[top[v]], u));
     }
 
     T query_subtree(int u)
@@ -44,11 +68,13 @@ private:
         for (auto& e : edge[root])
         {
             edge[e].erase(find(all(edge[e]), root));
+            depth[e] = depth[root] + 1;
+            par[e] = root;
             dfs_sz(e);
             sz[root] += sz[e];
 
             if (sz[e] > sz[edge[root][0]])
-                swap(e, sz[root][0]);
+                swap(e, edge[root][0]);
         }
     }
 
@@ -78,4 +104,6 @@ private:
     int in[SZ];
     int out[SZ];
     int top[SZ];
+    int par[SZ];
+    int depth[SZ];
 };

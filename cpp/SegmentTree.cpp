@@ -1,3 +1,4 @@
+
 constexpr int clog2(int n) { return ((n < 2) ? 1 : 1 + clog2(n / 2)); }
 
 template<typename T>
@@ -5,9 +6,9 @@ class SegmentTree
 {
 public:
     template<typename M>
-    SegmentTree(const M& m): merge(m) {}
+    SegmentTree(const M& m) : merge(m) {}
 
-    void init(vector<T>& raw_)
+    void init(const vector<T>& raw_)
     {
         raw = raw_;
         n = (int)raw.size();
@@ -28,7 +29,7 @@ private:
     using Merge = function<T(const T&, const T&)>;
     Merge merge;
 
-    T _init(vector<T>& raw, int node, int start, int end)
+    T _init(const vector<T>& raw, int node, int start, int end)
     {
         int mid = (start + end) / 2;
         if (start == end)
