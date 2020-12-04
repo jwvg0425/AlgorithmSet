@@ -13,9 +13,9 @@ class PST
 	};
 
 public:
-	PST(int n_, Merge m) : n(n_), merge(m)
-	{
-	}
+
+	template<typename M>
+	PST(int n_, const M& m) : n(n_), merge(m) {}
 
 	void modify(int idx, function<T(T)> modifier)
 	{
@@ -94,15 +94,10 @@ private:
 			_query(node[idx].ridx, start, end));
 	}
 
+	using Merge = function<T(const T&, const T&)>;
 	Merge merge;
 	vector<T> raw;
 	vector<int> root;
 	vector<Node> node;
 	int n;
 };
-
-template<typename T, typename Merge>
-PST<T, Merge> pst(int n, Merge merge)
-{
-	return PST<T, Merge>(n, merge);
-}
