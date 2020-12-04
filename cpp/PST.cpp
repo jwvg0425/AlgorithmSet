@@ -1,4 +1,3 @@
-
 template<typename T>
 class PST
 {
@@ -7,23 +6,55 @@ class PST
 		int lidx, ridx;
 		T value;
 
-		Node() :value(T()), lidx(0), ridx(0) {}
+		Node() :value(T()), lidx(-1), ridx(-1) {}
 	};
 
 public:
 	class iterator
 	{
-	private:
-		iterator(PST<T>& p, int s, int e)
-			: pst(p), node(1), start(s), end(e) {}
+	public:
+		iterator(PST<T>& p, int n)
+			: pst(p), node(n) {}
 
+		iterator& operator=(const iterator& other)
+		{
+			assert(&pst == &other.pst);
+			node = other.node;
+			return *this;
+		}
+
+		T get() const
+		{
+			return pst.node[node].value;
+		}
+
+		iterator left() const
+		{
+			return iterator(pst, pst.node[node].lidx);
+		}
+
+		iterator right() const
+		{
+			return iterator(pst, pst.node[node].ridx);
+		}
+
+	private:
 		PST<T>& pst;
-		int node, start, end;
+		int node;
 	};
 
 	template<typename M>
 	PST(int n_, const M& m) : n(n_), merge(m) {}
 
+	iterator it(int r)
+	{
+		return iterator(*this, root[r]);
+	}
+
+	int rmost() const
+	{
+		return n;
+	}
 
 	int update(int idx, const T& value)
 	{
