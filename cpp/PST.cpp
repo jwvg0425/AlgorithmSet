@@ -11,6 +11,16 @@ class PST
 	};
 
 public:
+	class iterator
+	{
+	private:
+		iterator(PST<T>& p, int s, int e)
+			: pst(p), node(1), start(s), end(e) {}
+
+		PST<T>& pst;
+		int node, start, end;
+	};
+
 	template<typename M>
 	PST(int n_, const M& m) : n(n_), merge(m) {}
 
