@@ -1,50 +1,46 @@
-template<typename T, typename Merge>
+
+template<typename T>
 class PST
 {
 	struct Node
 	{
 		int lidx, ridx;
 		T value;
-		int start, end;
 
-		Node() = default;
-		Node(int start_, int end_)
-			:start(start_), end(end_), value(T()), lidx(0), ridx(0) {}
+		Node() :value(T()), lidx(0), ridx(0) {}
 	};
 
 public:
-
 	template<typename M>
 	PST(int n_, const M& m) : n(n_), merge(m) {}
 
-	void modify(int idx, function<T(T)> modifier)
+
+	int update(int idx, const T& value)
 	{
-		update(idx, modifier(raw[idx]));
+		return update((int)root.size() - 1, idx, value);
 	}
 
-	void update(int idx, const T& value)
+	int update(int pre, int idx, const T& value)
 	{
-		raw[idx] = value;
-		int prev = root.back();
-		root.emplace_back(_update(prev, idx, value, 0, n));
+		root.emplace_back(_update(root[pre], idx, value, 0, n));
+		return (int)root.size() - 1;
 	}
 
 	T query(int k, int start, int end)
 	{
-		return _query(root[k], start, end);
+		return _query(root[k], start, end, 0, n);
 	}
 
 	void init()
 	{
 		root.push_back(init(0, n));
-		raw.resize(n);
 	}
 
 private:
 	int init(int start, int end)
 	{
 		int idx = node.size();
-		node.emplace_back(start, end);
+		node.emplace_back();
 
 		if (start != end)
 		{
@@ -62,7 +58,7 @@ private:
 			return prev;
 
 		int nidx = node.size();
-		node.emplace_back(start, end);
+		node.emplace_back();
 
 		if (start == end)
 			node[nidx].value = value;
@@ -77,26 +73,25 @@ private:
 		return nidx;
 	}
 
-	T _query(int idx, int start, int end)
+	T _query(int idx, int start, int end, int left, int right)
 	{
-		if (start <= node[idx].start && node[idx].end <= end)
+		if (start <= left && right <= end)
 			return node[idx].value;
 
-		int mid = (node[idx].start + node[idx].end) / 2;
-
-		if (mid < start)
-			return _query(node[idx].ridx, start, end);
+		int mid = (left + right) / 2;
 
 		if (mid + 1 > end)
-			return _query(node[idx].lidx, start, end);
+			return _query(node[idx].lidx, start, end, left, mid);
 
-		return merge(_query(node[idx].lidx, start, end),
-			_query(node[idx].ridx, start, end));
+		if (mid < start)
+			return _query(node[idx].ridx, start, end, mid + 1, right);
+
+		return merge(_query(node[idx].lidx, start, end, left, mid),
+			_query(node[idx].ridx, start, end, mid + 1, right));
 	}
 
 	using Merge = function<T(const T&, const T&)>;
 	Merge merge;
-	vector<T> raw;
 	vector<int> root;
 	vector<Node> node;
 	int n;
