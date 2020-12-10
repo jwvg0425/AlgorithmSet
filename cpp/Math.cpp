@@ -39,10 +39,11 @@ private:
     int sieve[N + 1];
 };
 
+template<typename T>
 class Mapping
 {
 public:
-	void init(const vector<i64>& raw, int base = 0)
+	void init(const vector<T>& raw, int base = 0)
 	{
 		start = base;
 		arr = raw;
@@ -50,12 +51,12 @@ public:
 		arr.erase(unique(arr.begin(), arr.end()), arr.end());
 	}
 
-	int get_idx(i64 k)
+	int get_idx(T k)
 	{
 		return start + (lower_bound(all(arr), k) - arr.begin());
 	}
 
-	i64 get_value(int idx)
+	T get_value(int idx)
 	{
 		return arr[idx - start];
 	}
@@ -66,6 +67,6 @@ public:
 	}
 
 private:
-	int start;
-	vector<i64> arr;
+	int start = 0;
+	vector<T> arr;
 };
