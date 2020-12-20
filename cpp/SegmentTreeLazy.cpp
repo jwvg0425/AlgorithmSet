@@ -23,7 +23,7 @@ public:
 
     void update_range(int left, int right, L diff) { _update_range(0, n - 1, 1, left, right, diff); }
 
-    T query(int left, int right) { return _query(0, n - 1, 1, left, right); }
+    T query(int left, int right) { return _query(1, 0, n - 1, left, right); }
 
 private:
     T _init(vector<T>& arr, int start, int end, int node)
@@ -72,19 +72,23 @@ private:
         tree[node] = merge(tree[node * 2], tree[node * 2 + 1]);
     }
 
-    T _query(int start, int end, int node, int left, int right)
+    T _query(int node, int start, int end, int left, int right)
     {
         update_lazy(start, end, node);
-
-        if (left > end || right < start)
-            return 0;
 
         if (left <= start && end <= right)
             return tree[node];
 
         int mid = (start + end) / 2;
-        return merge(_query(start, mid, node * 2, left, right),
-            _query(mid + 1, end, node * 2 + 1, left, right));
+
+        if (mid < left)
+            return _query(node * 2 + 1, mid + 1, end, left, right);
+
+        if (mid + 1 > right)
+            return _query(node * 2, start, mid, left, right);
+
+        return merge(_query(node * 2, start, mid, left, right),
+            _query(node * 2 + 1, mid + 1, end, left, right));
     }
 
     function<T(T, T)> merge;
