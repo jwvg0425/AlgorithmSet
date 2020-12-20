@@ -45,7 +45,7 @@ void fft(vector<base>& a, bool inv)
         a[i] /= n;
 }
 
-vector<i64> multiply(vector<i64>& v, vector<i64>& w)
+vector<i64> multiply(const vector<i64>& v, const vector<i64>& w)
 {
     vector<base> fv(v.begin(), v.end()), fw(w.begin(), w.end());
     int n = 2;
