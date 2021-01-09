@@ -70,3 +70,63 @@ private:
 	int start = 0;
 	vector<T> arr;
 };
+
+template<int N>
+class Factorization
+{
+public:
+    Factorization()
+    {
+        init();
+    }
+
+    void init()
+    {
+        for (int i = 2; i <= N; i++)
+        {
+            if (minP[i] != 0)
+                continue;
+
+            for (int j = i; j <= N; j += i)
+                if (minP[j] == 0)
+                    minP[j] = i;
+        }
+    }
+
+    // O(logN)
+    vector<int> seq(int n)
+    {
+        vector<int> res;
+        while (n > 1)
+        {
+            res.push_back(minP[n]);
+            n /= minP[n];
+        }
+
+        return res;
+    }
+
+    // O(logN) (prime, count)
+    vector<ii> group(int n)
+    {
+        vector<ii> res;
+
+        while (n > 1)
+        {
+            int cnt = 0;
+            int p = minP[n];
+            while (n % p == 0)
+            {
+                n /= p;
+                cnt++;
+            }
+
+            res.emplace_back(p, cnt);
+        }
+
+        return res;
+    }
+
+private:
+    int minP[N + 5];
+};
