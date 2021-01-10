@@ -130,3 +130,17 @@ public:
 private:
     int minP[N + 5];
 };
+
+ii64 gcd_ext(i64 a, i64 b)
+{
+    if (a == 0)
+        return ii64(0, 1);
+    if (b == 0)
+        return ii64(1, 0);
+
+    auto [xp, yp] = gcd_ext(b, a % b);
+
+    auto x = yp;
+    auto y = xp - a / b * x;
+    return ii64(x, y);
+}
