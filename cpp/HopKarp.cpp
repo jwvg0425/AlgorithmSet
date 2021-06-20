@@ -1,8 +1,8 @@
 template<int Size>
-class HorpKarp
+class HopKarp
 {
 public:
-    HorpKarp() : n(0)
+    HopKarp() : n(0)
     {
     }
 
