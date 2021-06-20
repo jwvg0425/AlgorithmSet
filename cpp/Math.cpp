@@ -15,7 +15,7 @@ public:
     bool isPrime(int k)
     {
         assert(0 <= k && k <= N);
-        return sieve[k] != 0;
+        return k != 0 && sieve[k] == k;
     }
 
 private:
@@ -28,7 +28,7 @@ private:
 
             primes.push_back(i);
 
-            for (int j = i; j <= N; j+=i)
+            for (int j = i; j <= N; j += i)
             {
                 sieve[j] = i;
             }
