@@ -15,7 +15,7 @@ public:
     bool isPrime(int k)
     {
         assert(0 <= k && k <= N);
-        return sieve[k] == 0;
+        return sieve[k] != 0;
     }
 
 private:
