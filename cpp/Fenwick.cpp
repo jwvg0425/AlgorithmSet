@@ -1,9 +1,13 @@
+
+
 class FenwickTree
 {
 public:
     FenwickTree(int k)
     {
         data.resize(k);
+        while ((1ll << (bit + 1)) < k)
+            bit++;
     }
 
     i64 sum(int n)
@@ -28,31 +32,20 @@ public:
         }
     }
 
-    int search(i64 k)
+    int kth(i64 k)
     {
-        int lo = 0, hi = data.size() - 1;
-        int ans = 0;
-
-        while (lo <= hi)
+        int ret = 0;
+        for (int i = bit; i >= 0; i--)
         {
-            int mid = (lo + hi) / 2;
-
-            i64 q = sum(mid);
-
-            if (q >= k)
-            {
-                ans = mid;
-                hi = mid - 1;
-            }
-            else
-            {
-                lo = mid + 1;
-            }
+            i64 t = ret + (1 << i);
+            if (t < data.size() && data[t] < k)
+                k -= data[ret = t];
         }
 
-        return ans;
+        return ret + 1;
     }
 
 private:
     vector<i64> data;
+    int bit;
 };
