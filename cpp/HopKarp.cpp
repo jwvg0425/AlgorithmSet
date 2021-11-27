@@ -46,8 +46,8 @@ public:
 private:
     const int INF = 1 << 30;
     int n;
-    int dist[Size];
-    bool used[Size];
+    int dist[Size] = { 0, };
+    bool used[Size] = { false, };
     vector<int> adj[Size];
     int work[Size] = { 0, };
 

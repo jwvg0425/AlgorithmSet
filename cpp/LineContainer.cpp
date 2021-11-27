@@ -15,7 +15,7 @@ struct Line
 
 struct LineContainer : multiset<Line, less<>>
 {
-    const i64 inf = LLONG_MAX;
+    const i64 inf = 1ll << 61;
 
     i64 div(i64 a, i64 b)
     {
