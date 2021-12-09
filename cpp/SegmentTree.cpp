@@ -5,6 +5,8 @@ template<typename T>
 class SegmentTree
 {
 public:
+    SegmentTree() = default;
+
     template<typename M>
     SegmentTree(const M& m) : merge(m) {}
 
