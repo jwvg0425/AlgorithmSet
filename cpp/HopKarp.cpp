@@ -14,6 +14,7 @@ public:
     void add_edge(int s, int e)
     {
         adj[s].push_back(e);
+        rev[e].push_back(s);
     }
 
     int matching()
@@ -41,6 +42,100 @@ public:
         return res;
     }
 
+    vector<int> alternating(const vector<int>& s)
+    {
+        vector<int> res;
+        bool vis[Size][2] = { false, };
+
+        queue<ii> q;
+
+        for (auto& si : s)
+        {
+            q.emplace(si, 0);
+            q.emplace(si, 1);
+            vis[si][0] = vis[si][1] = true;
+        }
+
+        while (!q.empty())
+        {
+            auto [now, pmatch] = q.front();
+            q.pop();
+
+            auto& cand = adj[now].empty() ? rev[now] : adj[now];
+
+            for (auto& nxt : cand)
+            {
+                bool matchedEdge = nxt == a[now] || nxt == b[now];
+                if (vis[nxt][matchedEdge])
+                    continue;
+
+                if (pmatch == matchedEdge)
+                    continue;
+
+                vis[nxt][matchedEdge] = true;
+                q.emplace(nxt, matchedEdge);
+            }
+        }
+
+        for (int i = 0; i < n; i++)
+            if (vis[i][0] || vis[i][1])
+                res.push_back(i);
+
+        return res;
+    }
+
+    vector<int> vertex_cover()
+    {
+        vector<int> st;
+
+        bool inL[Size] = { false, }, inR[Size] = { false, }, inX[Size] = { false, }, inY[Size] = { false, };
+        for (int i = 0; i < n; i++)
+        {
+            if (!adj[i].empty())
+            {
+                inL[i] = true;
+                if (a[i] == -1)
+                    st.push_back(i);
+            }
+            else
+            {
+                inR[i] = true;
+            }
+        }
+
+        auto x = alternating(st);
+
+        vector<int> res;
+
+        for (auto& xi : x)
+            inX[xi] = true;
+
+        for (int i = 0; i < n; i++)
+        {
+            if ((inL[i] && !inX[i]) || (inR[i] && inX[i]))
+                res.push_back(i);
+        }
+
+        return res;
+    }
+
+    vector<int> independent_set()
+    {
+        auto c = vertex_cover();
+        int isCover[Size] = { false, };
+
+        for (auto& ci : c)
+            isCover[ci] = true;
+
+        vector<int> res;
+
+        for (int i = 0; i < n; i++)
+            if (!isCover[i])
+                res.push_back(i);
+
+        return res;
+    }
+
     int a[Size], b[Size];
 
 private:
@@ -49,6 +144,7 @@ private:
     int dist[Size] = { 0, };
     bool used[Size] = { false, };
     vector<int> adj[Size];
+    vector<int> rev[Size];
     int work[Size] = { 0, };
 
     void bfs()
