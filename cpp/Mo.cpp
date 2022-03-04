@@ -1,5 +1,4 @@
-// use case : https://www.acmicpc.net/source/39925000
-
+// use case : https://www.acmicpc.net/source/39925850
 template<int BUCKET, typename Q, typename A, typename D>
 class Mo
 {
@@ -11,9 +10,9 @@ class Mo
 	};
 
 public:
-	template<typename Add, typename Erase, typename AFunc>
-	Mo(Add addFunc, Erase eraseFunc, AFunc getAnsFunc)
-		: add(addFunc), erase(eraseFunc), getAns(getAnsFunc)
+	template<typename Add, typename Erase>
+	Mo(Add addFunc, Erase eraseFunc)
+		: add(addFunc), erase(eraseFunc)
 	{
 	}
 
@@ -28,7 +27,7 @@ public:
 		ans.emplace_back();
 	}
 
-	vector<A> run(D state)
+	vector<A> run(D state, A ansv)
 	{
 		sort(all(qs), [](const QData& l, const QData& r)
 		{
@@ -41,7 +40,7 @@ public:
 			return lb < rb;
 		});
 
-		int lo = 1, hi = 1;
+		int lo = 1, hi = 0;
 
 		for (auto& q : qs)
 		{
@@ -51,41 +50,39 @@ public:
 			while (lo > nlo)
 			{
 				lo--;
-				add(lo, state);
+				add(lo, state, ansv);
 			}
 
 			while (hi < nhi)
 			{
 				hi++;
-				add(hi, state);
+				add(hi, state, ansv);
 			}
 
 			while (lo < nlo)
 			{
-				erase(lo, state);
+				erase(lo, state, ansv);
 				lo++;
 			}
 
 			while (hi > nhi)
 			{
-				erase(hi, state);
+				erase(hi, state, ansv);
 				hi--;
 			}
 
-			ans[q.idx] = getAns(state);
+			ans[q.idx] = ansv;
 		}
 
 		return ans;
 	}
 
 private:
-	using AddFunc = function<void(int, D&)>;
-	using EraseFunc = function<void(int, D&)>;
-	using AnsFunc = function<A(const D&)>;
+	using AddFunc = function<void(int, D&, A&)>;
+	using EraseFunc = function<void(int, D&, A&)>;
 
 	AddFunc add;
 	EraseFunc erase;
-	AnsFunc getAns;
 
 	vector<QData> qs;
 	vector<A> ans;
