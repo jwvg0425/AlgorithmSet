@@ -61,7 +61,7 @@ private:
 
         if (left <= start && end <= right)
         {
-            lazy[node] = diff;
+            lazy[node] = lazy_merge(lazy[node], diff);
             update_lazy(start, end, node);
             return;
         }
