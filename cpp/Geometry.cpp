@@ -73,3 +73,60 @@ bool intersect(i64 x1, i64 y1, i64 x2, i64 y2, i64 x3, i64 y3, i64 x4, i64 y4)
 
 	return l1l2 <= 0 && l2l1 <= 0;
 }
+
+struct Point
+{
+	i64 x, y;
+	int idx;
+};
+
+i64 ccw(Point p1, Point p2, Point p3)
+{
+	return (p2.x - p1.x) * (p3.y - p1.y) -
+		(p2.y - p1.y) * (p3.x - p1.x);
+}
+
+i64 distance(Point p1, Point p2)
+{
+	return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
+}
+
+vector<int> convexHull(vector<Point>& arr)
+{
+	sort(arr.begin(), arr.end(), [](Point l, Point r)
+		{
+			if (l.y < r.y)
+				return true;
+
+			if (l.y > r.y)
+				return false;
+
+			return l.x < r.x;
+		});
+
+	auto start = arr[0];
+
+	sort(arr.begin() + 1, arr.end(), [start](Point l, Point r)
+		{
+			auto c = ccw(start, l, r);
+			if (c > 0)
+				return true;
+
+			if (c < 0)
+				return false;
+
+			return distance(start, l) < distance(start, r);
+		});
+
+	vector<int> hull = { 0, 1 };
+
+	for (int i = 2; i < arr.size(); i++)
+	{
+		while (hull.size() >= 2 && ccw(arr[hull[hull.size() - 2]], arr[hull.back()], arr[i]) <= 0)
+			hull.pop_back();
+
+		hull.push_back(i);
+	}
+
+	return hull;
+}
